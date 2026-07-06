@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Classroom Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1E2422;
+    --ink-raised:#252C29;
+    --paper:#F6F3EC;
+    --paper-dim:#EDE8DB;
+    --line-dark:rgba(246,243,236,0.12);
+    --line-dark-strong:rgba(246,243,236,0.22);
+    --text-on-dark:#F6F3EC;
+    --text-on-dark-soft:#A9B2AC;
+    --ink-text:#23282A;
+    --ink-text-soft:#5C6560;
+    --line-paper:rgba(35,40,42,0.10);
+
+    --reinforce-fill:#E3EEE1;
+    --reinforce-line:#6E9B72;
+    --reinforce-text:#2C5230;
+    --reinforce-fill-dark:#2A362B;
+    --reinforce-text-dark:#B9D9BB;
+
+    --redirect-fill:#F7EAD1;
+    --redirect-line:#C98A3B;
+    --redirect-text:#7A4E12;
+    --redirect-fill-dark:#3A311F;
+    --redirect-text-dark:#E9BF7E;
+
+    --reset-fill:#F3DEDA;
+    --reset-line:#A34A3E;
+    --reset-text:#6E2A20;
+    --reset-fill-dark:#3A2523;
+    --reset-text-dark:#E3A69C;
+
+    --neutral-fill:#E7E3D6;
+    --neutral-line:#8C8672;
+    --neutral-text:#4A4536;
+    --neutral-fill-dark:#333026;
+    --neutral-text-dark:#C9C3AC;
+
+    --radius-card:14px;
+    --radius-pill:999px;
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text-on-dark);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--redirect-line); color:#1E2422; }
+
+  .wrap{ max-width:960px; margin:0 auto; padding:2.5rem 1.5rem 4.5rem; }
+
+  /* ---------- header ---------- */
+  header{ margin-bottom:1.75rem; }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--text-on-dark-soft);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:0.9rem;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px; height:7px; border-radius:50%;
+    background:var(--redirect-line);
+    display:inline-block;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-optical-sizing:auto;
+    font-weight:500;
+    font-size:clamp(2rem, 4.2vw, 2.9rem);
+    line-height:1.05;
+    margin:0 0 0.6rem;
+    color:var(--text-on-dark);
+    letter-spacing:-0.01em;
+  }
+  .zh-subtitle{
+    font-family:var(--font-display);
+    font-size:24px;
+    color:var(--text-on-dark-soft);
+    margin:0 0 1rem;
+  }
+  .subtitle{
+    font-size:15px;
+    color:var(--text-on-dark-soft);
+    max-width:46ch;
+    line-height:1.55;
+    margin:0 0 1.6rem;
+  }
+
+  /* ---------- tone legend / dial ---------- */
+  .tone-dial{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:1.1rem;
+  }
+  .tone-pill{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:0.03em;
+    padding:7px 14px;
+    border-radius:var(--radius-pill);
+    border:1px solid var(--line-dark-strong);
+    background:transparent;
+    color:var(--text-on-dark-soft);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    transition:transform .12s ease, border-color .12s ease, color .12s ease;
+  }
+  .tone-pill:hover{ transform:translateY(-1px); }
+  .tone-pill .dot{ width:8px; height:8px; border-radius:50%; }
+  .tone-pill[data-tone="reinforce"] .dot{ background:var(--reinforce-line); }
+  .tone-pill[data-tone="redirect"] .dot{ background:var(--redirect-line); }
+  .tone-pill[data-tone="reset"] .dot{ background:var(--reset-line); }
+  .tone-pill[data-tone="all"] .dot{ background:var(--text-on-dark-soft); }
+  .tone-pill.active{
+    color:var(--text-on-dark);
+    border-color:var(--text-on-dark);
+  }
+
+  /* ---------- phase tabs ---------- */
+  .phase-tabs{
+    display:flex;
+    gap:2px;
+    background:var(--ink-raised);
+    border:1px solid var(--line-dark);
+    border-radius:var(--radius-pill);
+    padding:4px;
+    margin-bottom:2rem;
+    overflow-x:auto;
+  }
+  .phase-tab{
+    flex:1;
+    white-space:nowrap;
+    text-align:center;
+    padding:10px 18px;
+    border-radius:var(--radius-pill);
+    font-size:13.5px;
+    font-weight:500;
+    color:var(--text-on-dark-soft);
+    cursor:pointer;
+    background:transparent;
+    border:none;
+    font-family:var(--font-body);
+    transition:background .15s ease, color .15s ease;
+  }
+  .phase-tab.active{
+    background:var(--paper);
+    color:var(--ink-text);
+  }
+
+  /* ---------- section labels ---------- */
+  .section-label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text-on-dark-soft);
+    margin:2.4rem 0 1rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line-dark);
+  }
+  .section-label:first-child{ margin-top:0; }
+
+  /* ---------- entering / exiting cards ---------- */
+  .flow-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
+    gap:12px;
+  }
+  .flow-card{
+    background:var(--paper);
+    border-radius:var(--radius-card);
+    overflow:hidden;
+    color:var(--ink-text);
+  }
+  .flow-card h3{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:16px;
+    margin:0;
+    padding:14px 16px 10px;
+    color:var(--ink-text);
+  }
+  .flow-line{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    padding:10px 16px;
+    border-top:1px solid var(--line-paper);
+    font-size:13.5px;
+    line-height:1.5;
+  }
+  .flow-line .tag{
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:3px 7px;
+    border-radius:5px;
+    flex-shrink:0;
+    margin-top:1px;
+  }
+  .flow-line.reinforce .tag{ background:var(--reinforce-fill); color:var(--reinforce-text); }
+  .flow-line.redirect .tag{ background:var(--redirect-fill); color:var(--redirect-text); }
+
+  /* ---------- chip strip (reinforce, checking, effort) ---------- */
+  .chip-strip{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip{
+    font-size:13px;
+    padding:9px 14px;
+    border-radius:var(--radius-pill);
+    background:var(--reinforce-fill);
+    color:var(--reinforce-text);
+    line-height:1.3;
+  }
+  .chip.neutral{ background:var(--neutral-fill); color:var(--neutral-text); }
+
+  /* ---------- redirect category cards ---------- */
+  .category-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px,1fr));
+    gap:10px;
+  }
+  .cat-card{
+    background:var(--paper);
+    border-radius:var(--radius-card);
+    padding:14px 16px 15px;
+    border-left:4px solid var(--redirect-line);
+    cursor:pointer;
+    color:var(--ink-text);
+    transition:background .12s ease;
+  }
+  .cat-card.reset{ border-left-color:var(--reset-line); }
+  .cat-card:hover{ background:var(--paper-dim); }
+  .cat-card h4{
+    font-size:14px;
+    font-weight:600;
+    margin:0 0 6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+  }
+  .cat-card h4 .chev{
+    font-size:12px;
+    color:var(--ink-text-soft);
+    transition:transform .15s ease;
+    flex-shrink:0;
+  }
+  .cat-card.open h4 .chev{ transform:rotate(180deg); }
+  .cat-card p.preview{
+    font-size:13px;
+    color:var(--ink-text-soft);
+    margin:0;
+    line-height:1.5;
+  }
+  .cat-card .full-list{
+    display:none;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--line-paper);
+  }
+  .cat-card.open .full-list{ display:block; }
+  .cat-card .full-list div{
+    font-size:13.5px;
+    padding:5px 0;
+    line-height:1.5;
+  }
+
+  /* ---------- anytime language accordion (on paper card) ---------- */
+  .u-cat-light{ margin-bottom:6px; border-radius:10px; overflow:hidden; background:var(--paper-dim); }
+  .u-cat-light summary{
+    list-style:none; cursor:pointer; padding:11px 13px;
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:13.5px; font-weight:600; color:var(--ink-text);
+  }
+  .u-cat-light summary::-webkit-details-marker{ display:none; }
+  .u-cat-light summary .chev{ color:var(--ink-text-soft); transition:transform .15s ease; font-size:11px; }
+  .u-cat-light[open] summary .chev{ transform:rotate(180deg); }
+  .u-cat-light .u-list{ padding:0 13px 13px; }
+  .u-cat-light .u-list div{
+    font-size:13.5px; color:var(--ink-text-soft); padding:5px 0 5px 13px;
+    border-left:2px solid var(--line-paper); margin-bottom:2px; line-height:1.5;
+  }
+
+  /* ---------- bottom tips strip ---------- */
+  .tips-strip{
+    background:var(--paper);
+    color:var(--ink-text);
+    border-radius:var(--radius-card);
+    overflow:hidden;
+    max-height:52px;
+    margin-bottom:1.4rem;
+    transition:max-height .28s cubic-bezier(.4,0,.2,1);
+  }
+  .tips-strip.open{ max-height:60vh; overflow-y:auto; }
+  .tips-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 1.3rem; cursor:pointer;
+  }
+  .tips-head .label{
+    font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.08em;
+    text-transform:uppercase; display:flex; align-items:center; gap:9px;
+  }
+  .tips-head .label::before{ content:"\2726"; color:var(--redirect-line); font-size:13px; }
+  .tips-head .chev{ transition:transform .2s ease; font-size:13px; color:var(--ink-text-soft); }
+  .tips-strip.open .tips-head .chev{ transform:rotate(180deg); }
+  .tips-body{ padding:0 1.3rem 1.2rem; }
+  .tips-body ul{ margin:0; padding-left:1.1rem; }
+  .tips-body li{ font-size:13.5px; line-height:1.7; }
+  .tips-body strong{ font-weight:600; }
+
+  .no-results{
+    color:var(--text-on-dark-soft); font-size:14px; padding:2rem 0; text-align:center;
+  }
+
+  @media (max-width:640px){
+    .wrap{ padding:1.8rem 1rem 4.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MS YAO'S REFERENCE</div>
+    <h1>Frequently Used Behavior Management Language</h1>
+    <p class="zh-subtitle">学生管理常用英文</p>
+
+    <div class="tips-strip" id="tipsStrip">
+      <div class="tips-head" id="tipsHead">
+        <span class="label">Best practice tips</span>
+        <span class="chev">&#9662;</span>
+      </div>
+      <div class="tips-body">
+        <ul id="tipsList"></ul>
+      </div>
+    </div>
+
+    <div class="tips-strip" id="anytimeStrip">
+      <div class="tips-head" id="anytimeHead">
+        <span class="label">Anytime language</span>
+        <span class="chev">&#9662;</span>
+      </div>
+      <div class="tips-body">
+        <div id="anytimeBody"></div>
+      </div>
+    </div>
+
+    <div class="tone-dial" id="toneDial">
+      <button class="tone-pill active" data-tone="all"><span class="dot"></span>All tones</button>
+      <button class="tone-pill" data-tone="reinforce"><span class="dot"></span>Reinforce</button>
+      <button class="tone-pill" data-tone="redirect"><span class="dot"></span>Redirect</button>
+    </div>
+
+    <div class="phase-tabs" id="phaseTabs">
+      <button class="phase-tab active" data-phase="entering">Entering</button>
+      <button class="phase-tab" data-phase="during">During class</button>
+      <button class="phase-tab" data-phase="exiting">Exiting</button>
+    </div>
+  </header>
+
+  <main id="mainContent"></main>
+</div>
+
+<script>
+const DATA = {
+  entering: [
+    {s:"Students entering quietly", r:"Excellent start. Thank you for coming in calmly.", d:"Let's reset and try entering quietly."},
+    {s:"Students prepared", r:"I can see everyone has their laptop and equipment ready.", d:"Please collect everything you need before we begin."},
+    {s:"Students seated quickly", r:"Thank you for settling so quickly.", d:"Find your seat and get started now."},
+    {s:"Students following the routine", r:"That's exactly what I expect, well done.", d:"Remember our entry routine: bag down, laptop ready, instructions on the screen."},
+    {s:"Students helping others", r:"Thanks for helping your classmate get organised.", d:"Right now, focus on getting yourself organised first."},
+    {s:"Students on task immediately", r:"Fantastic. Many of you have already started the warm-up activity.", d:"The warm-up has started. Please begin now."},
+    {s:"Late arrivals", r:"Thanks for joining us quietly.", d:"Please come in quietly and catch up without interrupting the class."},
+    {s:"Noise level", r:"I appreciate how calm everyone is.", d:"Conversations stop here. Eyes this way."}
+  ],
+  exiting: [
+    {s:"Packing away", r:"Thank you for packing up quickly.", d:"Please pack away your equipment now."},
+    {s:"Classroom tidy", r:"I appreciate everyone leaving the room tidy.", d:"Check your area before you leave."},
+    {s:"Waiting to be dismissed", r:"Excellent patience.", d:"The bell doesn't dismiss you, I do."},
+    {s:"Chairs tucked in", r:"Thank you for leaving the room ready for the next class.", d:"Please tuck your chair in."},
+    {s:"Equipment returned", r:"Everything has been returned, great job.", d:"Please return the equipment before leaving."},
+    {s:"Calm exit", r:"Thanks for leaving quietly.", d:"Walk to the door. No pushing or shouting."},
+    {s:"End of lesson", r:"Well done today. I enjoyed your effort.", d:"We're not finished yet. Stay focused until dismissed."}
+  ],
+  reinforcePhrases: [
+    "Thank you for listening respectfully.","That's a thoughtful answer.","Great question.",
+    "Excellent focus.","I like how you're solving that yourself first.","Great teamwork.",
+    "You're making real progress.","I can see you're sticking with a challenging task.",
+    "Thanks for helping without doing the work for them.","This is exactly the learning environment we want."
+  ],
+  redirectCategories: [
+    {name:"Off-task behaviour", tone:"redirect", phrases:["Let's get back to the task.","Show me you're ready to learn.","Focus on your own work.","Eyes on your screen or book.","Bring your attention back."]},
+    {name:"Talking while teacher is speaking", tone:"redirect", phrases:["Voices off.","I'll wait.","One voice at a time.","When I'm speaking, I need everyone listening.","Pause your conversation."]},
+    {name:"Calling out", tone:"redirect", phrases:["Please raise your hand.","Let's hear one person at a time.","Thank you, remember to wait until you're called on."]},
+    {name:"Mobile phone", tone:"redirect", phrases:["Please put your phone away.","Phones should be out of sight.","You can use your phone when I give permission."]},
+    {name:"Laptop misuse", tone:"redirect", phrases:["Screens at 45 degrees, thank you.","Close unrelated tabs.","Return to the learning task.","Show me the activity we're working on."]},
+    {name:"Not following instructions", tone:"redirect", phrases:["Let's try that again.","What's the instruction right now?","You know what to do.","Please follow the direction the first time."]},
+    {name:"Distracting others", tone:"redirect", phrases:["Please let others learn.","Focus on your own choices.","Move your attention back to your work.","You're stopping others from learning."]},
+    {name:"Calling across the room", tone:"redirect", phrases:["Use a normal speaking voice.","There's no need to call out.","Walk over if you need to speak to someone."]},
+    {name:"Out of seat", tone:"redirect", phrases:["Please return to your seat.","Unless you have permission, remain seated.","Take your seat so we can continue."]},
+    {name:"Refusal to work", tone:"redirect", phrases:["Let's start with the first question.","I'll help you get started.","Which part is confusing?","You don't have to finish it all now, just begin."]},
+    {name:"Low-level disruption", tone:"redirect", phrases:["That's enough.","Thank you.","We're moving on.","This is your reminder.","Make a better choice."]}
+  ],
+  checkingUnderstanding: [
+    "Who can explain the first step?","Thumbs up if you're ready.","Show me on your whiteboard.",
+    "Turn and explain it to your partner.","What questions do you have?"
+  ],
+  encouragingEffort: [
+    "Mistakes help us learn.","Have another go.","You're nearly there.","Keep going.",
+    "That's much better.","I noticed your improvement.","You're becoming more confident."
+  ],
+  universal: [
+    {name:"Attention getters", items:["Eyes this way.","Listening in 3, 2, 1.","Pens down.","Laptops at 45 degrees.","Freeze.","Hands free, eyes on me.","Thank you."]},
+    {name:"Positive narration", items:["I can see this side of the room is ready.","Thank you to everyone already working.","Most people are on task.","I'm noticing excellent teamwork.","That's the level of focus I'm looking for."]},
+    {name:"Restorative language", items:["What happened?","Who has been affected?","How can we fix this?","What can you do differently next time?","Let's solve the problem together."]},
+    {name:"Choice language", items:["You have two choices: work here quietly or move to another seat.","You decide what happens next.","The choice is yours.","Choose the behaviour that helps you succeed."]},
+    {name:"De-escalation language", items:["Let's keep this respectful.","I'm here to help.","Take a moment to think.","We'll talk when you're ready.","Let's focus on solving the problem."]}
+  ],
+  tips: [
+    "Keep directions <strong>brief, calm, and specific</strong>.",
+    "State <strong>what you want students to do</strong>, rather than what not to do.",
+    "Use <strong>positive reinforcement</strong> more frequently than correction.",
+    "Correct behaviour <strong>privately whenever possible</strong>.",
+    "Maintain a <strong>neutral tone</strong> and avoid arguing with students.",
+    "Follow through consistently with classroom expectations and routines."
+  ]
+};
+
+let state = { phase: "entering", tone: "all", search: "" };
+
+function matches(text){
+  return state.search === "" || text.toLowerCase().includes(state.search);
+}
+function toneOk(tone){
+  return state.tone === "all" || state.tone === tone;
+}
+
+function renderEnteringExiting(list){
+  const filtered = list.filter(item => {
+    const text = (item.s + " " + item.r + " " + item.d).toLowerCase();
+    return matches(text);
+  });
+  if(filtered.length === 0) return '<p class="no-results">No matching situations. Try a different search term.</p>';
+
+  return '<div class="flow-grid">' + filtered.map(item => {
+    let lines = "";
+    if(toneOk("reinforce")) lines += `<div class="flow-line reinforce"><span class="tag">Reinforce</span><span>${item.r}</span></div>`;
+    if(toneOk("redirect")) lines += `<div class="flow-line redirect"><span class="tag">Redirect</span><span>${item.d}</span></div>`;
+    return `<div class="flow-card"><h3>${item.s}</h3>${lines}</div>`;
+  }).join("") + '</div>';
+}
+
+function renderDuring(){
+  let html = "";
+
+  if(toneOk("reinforce") && DATA.reinforcePhrases.some(p => matches(p.toLowerCase()))){
+    html += '<div class="section-label">Reinforce</div>';
+    html += '<div class="chip-strip">' + DATA.reinforcePhrases.filter(p=>matches(p.toLowerCase())).map(p => `<span class="chip">${p}</span>`).join("") + '</div>';
+  }
+
+  if(toneOk("redirect") || toneOk("reset")){
+    const cats = DATA.redirectCategories.filter(c => toneOk(c.tone)).map(c => {
+      const nameMatch = matches(c.name.toLowerCase());
+      const phraseMatches = c.phrases.filter(p => matches(p.toLowerCase()));
+      if(state.search !== "" && !nameMatch && phraseMatches.length === 0) return null;
+      const shown = state.search !== "" && !nameMatch ? phraseMatches : c.phrases;
+      return {...c, shown};
+    }).filter(Boolean);
+
+    if(cats.length){
+      html += '<div class="section-label">Redirect</div>';
+      html += '<div class="category-grid">' + cats.map((c, idx) => {
+        const preview = c.shown.slice(0,2).join(" &middot; ");
+        const more = c.shown.length > 2 ? c.shown.length - 2 : 0;
+        return `<div class="cat-card ${c.tone==='reset'?'reset':''}" data-cat-idx="${idx}">
+          <h4>${c.name}<span class="chev">&#9662;</span></h4>
+          <p class="preview">${preview}${more ? ` &nbsp;+${more} more` : ""}</p>
+          <div class="full-list">${c.shown.map(p => `<div>${p}</div>`).join("")}</div>
+        </div>`;
+      }).join("") + '</div>';
+    }
+  }
+
+  if(toneOk("reinforce")){
+    const cu = DATA.checkingUnderstanding.filter(p => matches(p.toLowerCase()));
+    const ee = DATA.encouragingEffort.filter(p => matches(p.toLowerCase()));
+    if(cu.length){
+      html += '<div class="section-label">Checking understanding</div>';
+      html += '<div class="chip-strip">' + cu.map(p => `<span class="chip neutral">${p}</span>`).join("") + '</div>';
+    }
+    if(ee.length){
+      html += '<div class="section-label">Encouraging effort</div>';
+      html += '<div class="chip-strip">' + ee.map(p => `<span class="chip">${p}</span>`).join("") + '</div>';
+    }
+  }
+
+  if(html === "") html = '<p class="no-results">No matching phrases. Try a different search term.</p>';
+  return html;
+}
+
+function render(){
+  const main = document.getElementById("mainContent");
+  if(state.phase === "entering") main.innerHTML = renderEnteringExiting(DATA.entering);
+  else if(state.phase === "exiting") main.innerHTML = renderEnteringExiting(DATA.exiting);
+  else main.innerHTML = renderDuring();
+
+  document.querySelectorAll(".cat-card").forEach(card => {
+    card.addEventListener("click", () => card.classList.toggle("open"));
+  });
+}
+
+document.querySelectorAll(".phase-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".phase-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    state.phase = tab.dataset.phase;
+    render();
+  });
+});
+
+document.querySelectorAll(".tone-pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    document.querySelectorAll(".tone-pill").forEach(p => p.classList.remove("active"));
+    pill.classList.add("active");
+    state.tone = pill.dataset.tone;
+    render();
+  });
+});
+
+/* tips strip */
+document.getElementById("tipsList").innerHTML = DATA.tips.map(t => `<li>${t}</li>`).join("");
+const tipsStrip = document.getElementById("tipsStrip");
+document.getElementById("tipsHead").addEventListener("click", () => {
+  tipsStrip.classList.toggle("open");
+});
+
+/* anytime language strip */
+document.getElementById("anytimeBody").innerHTML = DATA.universal.map((cat, i) => `
+  <details class="u-cat-light" ${i===0 ? "open":""}>
+    <summary>${cat.name}<span class="chev">&#9662;</span></summary>
+    <div class="u-list">${cat.items.map(p => `<div>${p}</div>`).join("")}</div>
+  </details>
+`).join("");
+const anytimeStrip = document.getElementById("anytimeStrip");
+document.getElementById("anytimeHead").addEventListener("click", () => {
+  anytimeStrip.classList.toggle("open");
+});
+
+render();
+</script>
+</body>
+</html>
